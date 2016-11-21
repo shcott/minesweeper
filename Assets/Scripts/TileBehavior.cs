@@ -1,9 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class MineBehavior : MonoBehaviour {
+public class TileBehavior : MonoBehaviour {
 	
 	void Start () {
-	
 	}
 }

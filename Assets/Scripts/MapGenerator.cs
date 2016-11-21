@@ -1,34 +1,74 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 using System.Collections.Generic;
 
-public class MineGenerator : MonoBehaviour {
+public class MapGenerator : MonoBehaviour {
 
+	public string seed;
 	public int width;
 	public int height;
-	public GameObject minePrefab;
+	public int minesAmount;
+	public GameObject tilePrefab;
 
+	System.Random rand;
 	Tile[,] tileMap;
 	Dictionary<GameObject, Coord> objToCoord;
 
 	void Start() {
+		rand = new System.Random(seed.GetHashCode());
 		tileMap = new Tile[width, height];
 		objToCoord = new Dictionary<GameObject, Coord>();
 
 		GenerateTiles(.1f);
+		GenerateMines();
 	}
 
+	/*
+	 * Generates the tiles based off of the width and height.
+	 * @param tileLength the physical length that the tiles are scaled to
+	 */
 	void GenerateTiles(float tileLength) {
 		for(int x = 0; x < width; x++) {
 			for(int y = 0; y < height; y++) {
 				Vector3 pos = new Vector3((-width/2f + .5f + x) * tileLength, (-height/2f + .5f + y) * tileLength, 0);
-				tileMap[x, y] = new Tile(minePrefab, pos, tileLength);
+				tileMap[x, y] = new Tile(tilePrefab, pos, tileLength);
 				objToCoord.Add(tileMap[x, y].tileObject, new Coord(x, y));
 			}
 		}
 	}
 
-	public void HitMine(GameObject obj, bool leftClick, bool rightClick) {
+	/*
+	 * Generates the mines into the tile map.
+	 * @return true if generating is successful, false otherwise
+	 */
+	bool GenerateMines() {
+		if(minesAmount >= width * height)
+			return false;
+
+		// Add all possible tiles into the tile list
+		List<Tile> tileList = new List<Tile>();
+		for(int x = 0; x < width; x++) {
+			for(int y = 0; y < height; y++) {
+				tileList.Add(tileMap[x, y]);
+			}
+		}
+
+		// Randomly assign mines to tiles from the tile list until it reaches the mines amount
+		for(int count = 0; count < minesAmount; count++) {
+			int index = rand.Next(0, tileList.Count);
+			tileList[index].tileData.isMine = true;
+			//tileList[index].SetState(TileState.FLAGGED);
+			tileList.RemoveAt(index);
+		}
+
+		return true;
+	}
+
+	/*
+	 * Interacts with a tile with either a left click or a right click.
+	 */
+	public void HitTile(GameObject obj, bool leftClick, bool rightClick) {
 		Debug.Log(obj.name);
 		if(!objToCoord.ContainsKey(obj))
 			return;
@@ -42,7 +82,7 @@ public class MineGenerator : MonoBehaviour {
 			if(tile.tileState != TileState.FLAGGED) {
 				tile.SetState(TileState.CHECKED);
 				if(tile.tileData.isMine) {
-					// Game over
+					// TODO: Game over
 				}
 			}
 		}

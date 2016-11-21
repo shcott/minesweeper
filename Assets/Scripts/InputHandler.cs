@@ -4,11 +4,11 @@ using System.Collections;
 public class InputHandler : MonoBehaviour {
 
 	Camera cam;
-	MineGenerator mineGen;
+	MapGenerator mapGen;
 
 	void Start() {
 		cam = Camera.main;
-		mineGen = GetComponent<MineGenerator>();
+		mapGen = GetComponent<MapGenerator>();
 	}
 
 	void Update () {
@@ -20,7 +20,7 @@ public class InputHandler : MonoBehaviour {
 			if(Physics.Raycast(ray, out hit)) {
 				GameObject obj = hit.transform.gameObject;
 				if(obj != null)
-					mineGen.HitMine(obj, leftClick, rightClick);
+					mapGen.HitTile(obj, leftClick, rightClick);
 			}
 		}
 	}
